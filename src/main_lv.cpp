@@ -48,6 +48,20 @@ using namespace std;
 
 #if HAVE_IRRLICHT
 #include "graphics/local_view_scene.h"
+//Start My Changes****************************************
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/nonfree/features2d.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include "opencv2/core/core.hpp"
+
+#include <ros/ros.h>
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+
+//END My Changes****************************************
+
 ratslam::LocalViewScene *lvs = NULL;
 bool use_graphics;
 #endif

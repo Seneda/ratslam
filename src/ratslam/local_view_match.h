@@ -51,6 +51,19 @@ using boost::property_tree::ptree;
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/utility.hpp>
 #include <boost/serialization/vector.hpp>
+//Start My Changes****************************************
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/nonfree/features2d.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include "opencv2/core/core.hpp"
+
+#include <ros/ros.h>
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+
+//END My Changes****************************************
 
 namespace ratslam
 {
@@ -60,14 +73,22 @@ struct VisualTemplate
   unsigned int id;
   std::vector<double> data;
   double mean;
-
+  /*//Start My Changes****************************************
+  std::vector<cv::KeyPoint>  keypoints;
+  cv::Mat descriptors;
+  //END My Changes****************************************
+*/
   template<typename Archive>
     void serialize(Archive& ar, const unsigned int version)
     {
       ar & id;
       ar & data;
       ar & mean;
-    }
+  /*    //Start My Changes****************************************
+      ar & keypoints;
+      ar & descriptors;
+      //END My Changes****************************************
+    */}
 
 };
 
@@ -170,6 +191,19 @@ private:
 
   std::vector<VisualTemplate> templates;
   std::vector<double> current_view;
+  
+  //Start My Changes****************************************
+  cv::FastFeatureDetector detect;
+  cv::FastFeatureDetector detector;
+  cv::BriefDescriptorExtractor extractor;
+  
+  std::vector<cv::KeyPoint>  current_keypoints;
+  cv::Mat image;
+  cv::Mat current_descriptors;
+  //End My Changes****************************************/
+  
+
+
 
   int image_size;
   int current_vt;

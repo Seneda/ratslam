@@ -40,6 +40,21 @@ using namespace std;
 
 #include <stdio.h>
 
+//Start My Changes****************************************
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/nonfree/features2d.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include "opencv2/core/core.hpp"
+
+#include <ros/ros.h>
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+
+//END My Changes****************************************
+
+
 namespace ratslam
 {
 
@@ -141,7 +156,7 @@ void LocalViewMatch::convert_view_to_view_template(bool grayscale)
   for (unsigned int i; i < current_view.size(); i++)
     current_view[i] = 0;
 
-  if (grayscale)  // This section cycles through the image, and cycles throuh individual sub blocks(as specified in teh config) then averages the pixel values o give a visual template
+  if (grayscale)  // This section cycles through the image, and cycles throuh individual sub blocks(as specified in the config) then averages the pixel values o give a visual template
   {
     for (int y_block = IMAGE_VT_Y_RANGE_MIN, y_block_count = 0; y_block_count < TEMPLATE_Y_SIZE; y_block += y_block_size, y_block_count++)
     {
@@ -273,6 +288,21 @@ void LocalViewMatch::convert_view_to_view_template(bool grayscale)
 
   current_mean = sum/current_view.size();
 
+  /*/Start My Changes****************************************
+  // Find Features in image
+  cv::Mat *image = new cv::Mat(current_view,true); 
+  /*image.resize(1,TEMPLATE_Y_SIZE);     //Only works for greyscale
+  detector.detect(image, current_keypoints);
+  extractor.compute(image, current_keypoints, current_descriptors);
+  printf("The number of current keypoints is %lu\n",current_keypoints.size() );
+ 
+      
+
+
+
+
+
+  //END My Changes****************************************/
 }
 
 // create and add a visual template to the collection
