@@ -63,7 +63,7 @@ using boost::property_tree::ptree;
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
-//END My Changes****************************************
+//END My Changes****************************************/
 
 namespace ratslam
 {
@@ -73,22 +73,22 @@ struct VisualTemplate
   unsigned int id;
   std::vector<double> data;
   double mean;
-  /*//Start My Changes****************************************
+  ///Start My Changes****************************************
   std::vector<cv::KeyPoint>  keypoints;
   cv::Mat descriptors;
-  //END My Changes****************************************
-*/
+  //END My Changes****************************************/
+
   template<typename Archive>
     void serialize(Archive& ar, const unsigned int version)
     {
       ar & id;
       ar & data;
       ar & mean;
-  /*    //Start My Changes****************************************
+      //Start My Changes****************************************
       ar & keypoints;
       ar & descriptors;
-      //END My Changes****************************************
-    */}
+      //END My Changes****************************************/
+    }
 
 };
 

@@ -288,20 +288,13 @@ void LocalViewMatch::convert_view_to_view_template(bool grayscale)
 
   current_mean = sum/current_view.size();
 
-  /*/Start My Changes****************************************
+  //Start My Changes****************************************
   // Find Features in image
-  cv::Mat *image = new cv::Mat(current_view,true); 
-  /*image.resize(1,TEMPLATE_Y_SIZE);     //Only works for greyscale
+  image = cv::Mat(current_view,true); 
+  image.resize(1,TEMPLATE_Y_SIZE);     //Only works for greyscale
   detector.detect(image, current_keypoints);
   extractor.compute(image, current_keypoints, current_descriptors);
   printf("The number of current keypoints is %lu\n",current_keypoints.size() );
- 
-      
-
-
-
-
-
   //END My Changes****************************************/
 }
 
