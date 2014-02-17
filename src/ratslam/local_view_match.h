@@ -59,6 +59,7 @@ using boost::property_tree::ptree;
 #include "opencv2/core/core.hpp"
 
 #include <ros/ros.h>
+#include <ros/console.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
@@ -74,8 +75,11 @@ struct VisualTemplate
   std::vector<double> data;
   double mean;
   ///Start My Changes****************************************
+  //ROS_DEBUG_STREAM("Adding details to header");
+
   std::vector<cv::KeyPoint>  keypoints;
   cv::Mat descriptors;
+  cv::Mat image;
   //END My Changes****************************************/
 
   template<typename Archive>
@@ -171,6 +175,8 @@ private:
   // returns the matching template and the MSE
   void compare(double &vt_err, unsigned int &vt_match_id);
 
+  void compare2(double &vt_err, unsigned int &vt_match_id);/////////////////////////////////////////my function
+
   int VT_SHIFT_MATCH;
   int VT_STEP_MATCH;
 
@@ -192,14 +198,18 @@ private:
   std::vector<VisualTemplate> templates;
   std::vector<double> current_view;
   
+
+
   //Start My Changes****************************************
-  cv::FastFeatureDetector detect;
+  //ROS_DEBUG_STREAM("Adding variables to header");
+  //cv::FastFeatureDetector detect;
   cv::FastFeatureDetector detector;
   cv::BriefDescriptorExtractor extractor;
-  
+  std::vector<double> current_view2;
   std::vector<cv::KeyPoint>  current_keypoints;
-  cv::Mat image;
+  cv::Mat current_image;
   cv::Mat current_descriptors;
+
   //End My Changes****************************************/
   
 
