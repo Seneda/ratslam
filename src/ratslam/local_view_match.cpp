@@ -120,7 +120,7 @@ void LocalViewMatch::on_image(const unsigned char * view_rgb, bool greyscale, un
     cout << "VTM[" << setw(4) << get_current_vt() << "] " << endl;
     cout.flush();
     //ROS_FATAL_STREAM("--------------------------familiar view " << vt_match_id);
-    ROS_FATAL_STREAM(" vt error "<< vt_error << " ---VT_ID " <<vt_match_id<<"---------------familiar view ");
+    //ROS_FATAL_STREAM(" vt error "<< vt_error << " ---VT_ID " <<vt_match_id<<"---------------familiar view ");
    
   }
   else
@@ -130,7 +130,7 @@ void LocalViewMatch::on_image(const unsigned char * view_rgb, bool greyscale, un
     cout << "VTN[" << setw(4) << get_current_vt() << "] " << endl;
     cout.flush();
     //ROS_FATAL_STREAM("non-familiar view " << templates.size() << " Nearly " << vt_match_id );
-    ROS_FATAL_STREAM(" vt error "<< vt_error << " ---VT_ID " <<vt_match_id<<"---------------non-familiar view ");
+    //ROS_FATAL_STREAM(" vt error "<< vt_error << " ---VT_ID " <<vt_match_id<<"---------------non-familiar view ");
    
   }
 
@@ -342,14 +342,15 @@ void LocalViewMatch::convert_view_to_view_template(bool grayscale)
   //ROS_FATAL_STREAM("Just found keypoints, found " << current_keypoints.size());
   //ROS_FATAL_STREAM("Before descriptors are found they are " << current_descriptors.size());
   cv::Mat current_image2;
+  
+  
+  extractor.compute(current_image, current_keypoints, current_descriptors);
+  ROS_FATAL_STREAM("No of descriptors is : " << current_descriptors.rows);
   cv::drawKeypoints(current_image, current_keypoints,current_image2,cv::Scalar::all(-1),4);
   
   cv::namedWindow("current_image",CV_WINDOW_NORMAL);
   cv::imshow("current_image", current_image2);
   cv::waitKey(3);
-  
-  extractor.compute(current_image, current_keypoints, current_descriptors);
-  //ROS_FATAL_STREAM("The no of descriptors is : " << current_descriptors.rows);
   //cv::waitKey(0);
   //END My Changes****************************************/
   //cv::destroyWindow("image");
@@ -569,20 +570,38 @@ void LocalViewMatch::compare2(double &vt_err, unsigned int &vt_match_id)
   int min_offset;
 
   int offset;
-  double epsilon = 0.005;
+  double epsilon = 0.1;
   
   int max_matches= 0;
+  // Debugging
+  int total_comparisons = 0;
+  int mean_breaks = 0;
+  int descriptor_breaks = 0;
+  //************************/
 
 
-  BOOST_FOREACH(vt, templates)
+
+  BOOST_FOREACH(vt, templates) // reverse search may be optimal
   {
     //vt_error = 0;
-    //if (abs(current_mean - vt.mean) > -0.0001*VT_MATCH_THRESHOLD + epsilon)
-    // continue; // skips this vt if the means are too different
-    if (vt.descriptors.rows < -1*VT_MATCH_THRESHOLD )
+     
+    total_comparisons++;  
+    if (abs(current_mean - vt.mean) > epsilon){
+      //ROS_FATAL_STREAM("mean diff "<<(current_mean - vt.mean));
+      mean_breaks++;
       continue; // skips this vt if the means are too different
+    }
+    if (vt.descriptors.rows < -0.5*VT_MATCH_THRESHOLD ){
+      descriptor_breaks++;
+      continue; // skips this vt if there are not enough descriptors
+    }
+    if (vt.descriptors.rows > 1.5*current_descriptors.rows ){
+      descriptor_breaks++;
+      continue; // skips this vt if there are too many descriptors
+    }
 
     cv::BFMatcher matcher(cv::NORM_HAMMING);
+    //cv::FlannBasedMatcher matcher(new cv::flann::LshIndexParams(20,10,2));
     std::vector< cv::DMatch > matches; 
     matcher.match( current_descriptors, vt.descriptors, matches );
     if (matches.size() == 0){
@@ -595,7 +614,7 @@ void LocalViewMatch::compare2(double &vt_err, unsigned int &vt_match_id)
             
       for( int i = 0; i < current_descriptors.rows; i++ )
       {    
-        if( matches[i].distance <= 20)
+        if( matches[i].distance <= 5)
         { 
           good_matches.push_back( matches[i]); }
       }
@@ -615,14 +634,23 @@ void LocalViewMatch::compare2(double &vt_err, unsigned int &vt_match_id)
       cv::namedWindow("Good Matches",CV_WINDOW_NORMAL);
       cv::imshow( "Good Matches", img_matches );
       cv::waitKey(3);
-      ROS_FATAL_STREAM("Matches " << matches.size() );
-      if (max_matches >= VT_MATCH_THRESHOLD)
+      //ROS_FATAL_STREAM("Matches " << matches.size() );
+      if (max_matches >= VT_MATCH_THRESHOLD){
+        //if (abs(current_mean - vt.mean)>max_match_mean_diff)
+          //max_match_mean_diff =   abs(current_mean - vt.mean);
         continue;
+      }
+      if (max_matches >= 0.9*vt.descriptors.rows){
+        
+        continue;
+      }
      
     }     
     //vt_match_id = min_template;
+    //ROS_FATAL_STREAM("Max Match Mean diff "<<max_match_mean_diff);
   }
-   
+  //ROS_FATAL_STREAM("total_comparisons " <<total_comparisons<<" total templates "<<templates.size()<< " ratio " <<float(total_comparisons/templates.size()));
+    
 }
 }
 

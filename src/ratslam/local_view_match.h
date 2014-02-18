@@ -204,7 +204,7 @@ private:
   //ROS_DEBUG_STREAM("Adding variables to header");
   //cv::FastFeatureDetector detect;
   cv::FastFeatureDetector detector;
-  cv::BriefDescriptorExtractor extractor;
+  cv::BriefDescriptorExtractor extractor = cv::BriefDescriptorExtractor(16);
   std::vector<double> current_view2;
   std::vector<cv::KeyPoint>  current_keypoints;
   cv::Mat current_image;
@@ -221,6 +221,11 @@ private:
   double vt_error;
   int prev_vt;
   double vt_relative_rad;
+  // ********************************** Debugging Variables
+  
+  double max_match_mean_diff = 0;
+
+  //*************************************************/
 
   const unsigned char *view_rgb;
   bool greyscale;
