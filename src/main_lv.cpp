@@ -72,6 +72,8 @@ ratslam::LocalViewMatch * lv = NULL;
 
 void image_callback(sensor_msgs::ImageConstPtr image, ros::Publisher * pub_vt)
 {
+
+  
   ROS_DEBUG_STREAM("LV:image_callback{" << ros::Time::now() << "} seq=" << image->header.seq);
 
   static ratslam_ros::ViewTemplate vt_output;
@@ -123,7 +125,7 @@ int main(int argc, char * argv[])
   ros::Publisher pub_vt = node.advertise<ratslam_ros::ViewTemplate>(topic_root + "/LocalView/Template", 0);
 
   image_transport::ImageTransport it(node);
-  image_transport::Subscriber sub = it.subscribe(topic_root + "/camera/image", 0, boost::bind(image_callback, _1, &pub_vt)); // bind creates a function with one argument as the callback mechanism oly giev one argument(the image) and automatically passes the pub bit every time
+  image_transport::Subscriber sub = it.subscribe(topic_root + "/camera/image1", 0, boost::bind(image_callback, _1, &pub_vt)); // bind creates a function with one argument as the callback mechanism oly giev one argument(the image) and automatically passes the pub bit every time
 
 
 #ifdef HAVE_IRRLICHT

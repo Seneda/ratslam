@@ -109,18 +109,19 @@ void LocalViewMatch::on_image(const unsigned char * view_rgb, bool greyscale, un
 
   this->view_rgb = view_rgb;
   this->greyscale = greyscale;
-
+  
   convert_view_to_view_template(greyscale); //This now adds data to the image and current_descriptors variables
   prev_vt = get_current_vt();
   unsigned int vt_match_id;
   compare2(vt_error, vt_match_id);
-  if (vt_error <= VT_MATCH_THRESHOLD)
+  if (vt_error <= VT_MATCH_THRESHOLD) 
   {
     set_current_vt((int)vt_match_id);
     cout << "VTM[" << setw(4) << get_current_vt() << "] " << endl;
     cout.flush();
-    ROS_FATAL_STREAM("familiar view - used template "<<vt_match_id);
-    
+    //ROS_FATAL_STREAM("--------------------------familiar view " << vt_match_id);
+    ROS_FATAL_STREAM(" vt error "<< vt_error << " ---VT_ID " <<vt_match_id<<"---------------familiar view ");
+   
   }
   else
   {
@@ -128,7 +129,9 @@ void LocalViewMatch::on_image(const unsigned char * view_rgb, bool greyscale, un
     set_current_vt(create_template());
     cout << "VTN[" << setw(4) << get_current_vt() << "] " << endl;
     cout.flush();
-    ROS_FATAL_STREAM("non-familiar view  - made new template " << templates.size() );
+    //ROS_FATAL_STREAM("non-familiar view " << templates.size() << " Nearly " << vt_match_id );
+    ROS_FATAL_STREAM(" vt error "<< vt_error << " ---VT_ID " <<vt_match_id<<"---------------non-familiar view ");
+   
   }
 
 }
@@ -338,13 +341,19 @@ void LocalViewMatch::convert_view_to_view_template(bool grayscale)
   detector.detect(current_image, current_keypoints);
   //ROS_FATAL_STREAM("Just found keypoints, found " << current_keypoints.size());
   //ROS_FATAL_STREAM("Before descriptors are found they are " << current_descriptors.size());
-  //cv::waitKey(0);
+  cv::Mat current_image2;
+  cv::drawKeypoints(current_image, current_keypoints,current_image2,cv::Scalar::all(-1),4);
+  
+  cv::namedWindow("current_image",CV_WINDOW_NORMAL);
+  cv::imshow("current_image", current_image2);
+  cv::waitKey(3);
+  
   extractor.compute(current_image, current_keypoints, current_descriptors);
-  ROS_FATAL_STREAM("The no of descriptors is : " << current_descriptors.size()<<" type is "<< current_descriptors.type());
+  //ROS_FATAL_STREAM("The no of descriptors is : " << current_descriptors.rows);
   //cv::waitKey(0);
   //END My Changes****************************************/
   //cv::destroyWindow("image");
-
+  
 }
 
 // create and add a visual template to the collection
@@ -364,7 +373,7 @@ int LocalViewMatch::create_template()
   new_template->descriptors = current_descriptors;
   new_template->image = current_image;
 
-  ROS_FATAL_STREAM("Successfully made new template");
+  //ROS_FATAL_STREAM("Successfully made new template");
     
   return templates.size() - 1;
 }
@@ -531,18 +540,20 @@ void LocalViewMatch::compare(double &vt_err, unsigned int &vt_match_id)
 
 void LocalViewMatch::compare2(double &vt_err, unsigned int &vt_match_id)
 {
+  
   if (templates.size() == 0)
   {
-    vt_err = DBL_MAX;
-    vt_error = vt_err;
+    //vt_err = DBL_MAX;
+    vt_error = 0;//vt_err;
     return;
   }
-  
+  vt_error = 0;    
+  vt_match_id = 0;
   double *data = &current_view[0];
   double mindiff, cdiff;
   mindiff = DBL_MAX;
 
-  vt_err = DBL_MAX;
+  //vt_err = DBL_MAX;
   int min_template = 0;
 
   double *template_ptr;
@@ -565,63 +576,53 @@ void LocalViewMatch::compare2(double &vt_err, unsigned int &vt_match_id)
 
   BOOST_FOREACH(vt, templates)
   {
-    vt_err = 0;
-    if (abs(current_mean - vt.mean) > -0.001*VT_MATCH_THRESHOLD + epsilon)
-      continue; // skips this vt if the means are too different
-    if (vt.descriptors.cols < -1*VT_MATCH_THRESHOLD )
+    //vt_error = 0;
+    //if (abs(current_mean - vt.mean) > -0.0001*VT_MATCH_THRESHOLD + epsilon)
+    // continue; // skips this vt if the means are too different
+    if (vt.descriptors.rows < -1*VT_MATCH_THRESHOLD )
       continue; // skips this vt if the means are too different
 
-    ////////***************************************************************************************************
     cv::BFMatcher matcher(cv::NORM_HAMMING);
     std::vector< cv::DMatch > matches; 
-    //ROS_FATAL_STREAM("current_descriptors : " << current_descriptors.size()<<" type : "<< current_descriptors.type());
-    //ROS_FATAL_STREAM("vt.descriptors : " << vt.descriptors.size()<<" type : "<< vt.descriptors.type());
     matcher.match( current_descriptors, vt.descriptors, matches );
-    double max_dist = 0; double min_dist = 100;
-    //-- Quick calculation of max and min distances between keypoints
-    //for( int i = 0; i < current_descriptors.rows; i++ )
-    //{ double dist = matches[i].distance;
-    //  if( dist < min_dist ) min_dist = dist;
-    //  if( dist > max_dist ) max_dist = dist;
-    //}
-    //ROS_FATAL_STREAM("-- Max dist : "<< max_dist );
-    //ROS_FATAL_STREAM("-- Min dist : "<< min_dist );
-    //-- Draw only "good" matches (i.e. whose distance is less than 2*min_dist,
-    //-- or a small arbitary value ( 0.02 ) in the event that min_dist is very
-    //-- small)
-    //-- PS.- radiusMatch can also be used here.
+    if (matches.size() == 0){
+      continue;
+    }
+
     std::vector< cv::DMatch > good_matches;
-    for( int i = 0; i < current_descriptors.rows; i++ )
-    //{ if( matches[i].distance <= std::max(1.5*min_dist, 1) )
-    { if( matches[i].distance <= 5)
-      { good_matches.push_back( matches[i]); }
+      
+    if (current_descriptors.rows > 0){
+            
+      for( int i = 0; i < current_descriptors.rows; i++ )
+      {    
+        if( matches[i].distance <= 20)
+        { 
+          good_matches.push_back( matches[i]); }
+      }
     }
     //-- Draw only "good" matches
     cv::Mat img_matches;
-    drawMatches( current_image, current_keypoints, vt.image, vt.keypoints, good_matches, img_matches, cv::Scalar::all(-1), cv::Scalar::all(-1), cv::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-
-    //-- Show detected matches
-    cv::imshow( "Good Matches", img_matches );
-    cv::waitKey(3);
-    //ROS_FATAL_STREAM("The number of matches is " << matches.size()  );
-    //ROS_FATAL_STREAM(" no of good matches "<< good_matches.size() );
-    //ROS_FATAL_STREAM(" type is  "<< current_image.type() );
+    if (good_matches.size() > 0)
+    {
+      drawMatches( current_image, current_keypoints, vt.image, vt.keypoints, good_matches, img_matches, cv::Scalar::all(-1), cv::Scalar::all(-1), cv::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+    }
 
     if (good_matches.size() > max_matches){
       max_matches=good_matches.size();
       min_template = vt.id;
-      vt_match_id = vt.id ;  
-      vt_err = -1*max_matches;
-      ROS_FATAL_STREAM(" max good matches "<< max_matches);
-      ROS_FATAL_STREAM(" total number of matches is " << matches.size()  );
-      
-    } //duplicate lines here
-    ////////***************************************************************************************************/
-    
+      vt_match_id = min_template ;  
+      vt_error = -1*max_matches;
+      cv::namedWindow("Good Matches",CV_WINDOW_NORMAL);
+      cv::imshow( "Good Matches", img_matches );
+      cv::waitKey(3);
+      ROS_FATAL_STREAM("Matches " << matches.size() );
+      if (max_matches >= VT_MATCH_THRESHOLD)
+        continue;
+     
+    }     
     //vt_match_id = min_template;
   }
-  ROS_FATAL_STREAM(" vt error "<< vt_err );
-    
+   
 }
 }
 
