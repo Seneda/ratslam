@@ -120,7 +120,7 @@ void LocalViewMatch::on_image(const unsigned char * view_rgb, bool greyscale, un
     cout << "VTM[" << setw(4) << get_current_vt() << "] " << endl;
     cout.flush();
     //ROS_FATAL_STREAM("--------------------------familiar view " << vt_match_id);
-    //ROS_FATAL_STREAM(" vt error "<< vt_error << " ---VT_ID " <<vt_match_id<<"---------------familiar view ");
+    ROS_FATAL_STREAM(" vt error "<< vt_error << " ---VT_ID " <<vt_match_id<<"---------------familiar view ");
    
   }
   else
@@ -130,7 +130,7 @@ void LocalViewMatch::on_image(const unsigned char * view_rgb, bool greyscale, un
     cout << "VTN[" << setw(4) << get_current_vt() << "] " << endl;
     cout.flush();
     //ROS_FATAL_STREAM("non-familiar view " << templates.size() << " Nearly " << vt_match_id );
-    //ROS_FATAL_STREAM(" vt error "<< vt_error << " ---VT_ID " <<vt_match_id<<"---------------non-familiar view ");
+    ROS_FATAL_STREAM(" vt error "<< vt_error << " ---VT_ID " <<vt_match_id<<"---------------non-familiar view ");
    
   }
 
@@ -578,8 +578,8 @@ void LocalViewMatch::compare2(double &vt_err, unsigned int &vt_match_id)
   int mean_breaks = 0;
   int descriptor_breaks = 0;
   //************************/
-
-
+  ros::Time timer;
+  ros::Time starttime = timer.now();
 
   BOOST_FOREACH(vt, templates) // reverse search may be optimal
   {
@@ -647,8 +647,16 @@ void LocalViewMatch::compare2(double &vt_err, unsigned int &vt_match_id)
      
     }     
     //vt_match_id = min_template;
+    
     //ROS_FATAL_STREAM("Max Match Mean diff "<<max_match_mean_diff);
   }
+  ros::Duration duration = timer.now()-starttime;
+  //double durationsecs  = duration.sec + 0.000000001*duration.nsec;
+  //ROS_FATAL_STREAM("Time diff "<<(duration.toSec()) << " for " << templates.size() <<" templates");
+  //ROS_FATAL_STREAM("Time/template ~= " << ((duration.toSec())/templates.size())) ;
+  ROS_FATAL_STREAM("Time/Maxtime (0.2) ~= " << ((duration.toSec())/0.2)) ;
+  
+  
   //ROS_FATAL_STREAM("total_comparisons " <<total_comparisons<<" total templates "<<templates.size()<< " ratio " <<float(total_comparisons/templates.size()));
     
 }
