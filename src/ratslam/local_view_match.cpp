@@ -570,7 +570,7 @@ void LocalViewMatch::compare2(double &vt_err, unsigned int &vt_match_id)
   int min_offset;
 
   int offset;
-  double epsilon = 0.1;
+  double epsilon = 0.05;
   
   int max_matches= 0;
   // Debugging
