@@ -10,7 +10,7 @@ image_crop_y_max=260
 template_x_size=60
 template_y_size=50
 
-vt_match_threshold = 0.07
+vt_match_threshold = 0.02
 vt_shift_match = 4
 vt_step_match = 1
 vt_active_decay = 1.0
@@ -22,7 +22,7 @@ pc_cell_x_size = 0.25
 pc_dim_xy = 20
 
 
-pc_vt_inject_energy = 0.075
+pc_vt_inject_energy = 0.05
 
 
 exp_loops=20
