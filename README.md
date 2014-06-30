@@ -30,7 +30,7 @@ Terminal 2: rosrun topic_tools relay /odom /test/odom
 
 The Video feed needs to be renamed and the framerate reduced (In this branch the topic is called image, in the modified branch it is image1)
 
-Terminal 3: rosrun topic_tools drop /stereo/left/image_mono/compressed 3 4 /test/camera/image/compressed
+Terminal 3: rosrun topic_tools drop /stereo/left/image_mono/compressed 3 4 /test/camera/image1/compressed
 
 Run one of the bagfiles provided
 
