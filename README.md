@@ -8,9 +8,11 @@ To Run This version of RatSLAM:
 
 First install the dependencies as stated in the documentation for OpenRatSLAM : 
 "Dependencies
+
 OpenRatSLAM depends on ROS packages: opencv2 and topological_nav_msgs and also on 3D graphics library Irrlicht Irrlicht can be installed on Ubuntu with apt-get
 
 sudo apt-get install libirrlicht-dev"
+
 
 Then copy the contents of this repository into your Catkin workspace.
 
