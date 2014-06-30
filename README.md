@@ -19,14 +19,18 @@ catkin_make
 To run ratslam, open four terminals:
 
 Launch RatSLAM
+
 Terminal 1: roslaunch ratslam_ros test.launch
 
 The odom topic needs to be renamed
+
 Terminal 2: rosrun topic_tools relay /odom /test/odom
 
 The Video feed needs to be renamed and the framerate reduced
+
 Terminal 3: rosrun topic_tools drop /stereo/left/image_mono/compressed 3 4 /test/camera/image1/compressed
 
 Run one of the bagfiles provided
+
 Terminal 4: rosbag play FinalBagfiles/dynamic-control-2.bag 
 
